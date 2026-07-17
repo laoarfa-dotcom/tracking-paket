@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pelacakan Paket Online</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet.js CSS (Peta Gratis) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet.js JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 380px; z-index: 10; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600/20 text-blue-400 rounded-xl flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-truck-fast text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">TRACKING EXPRESS</h1>
+                    <p class="text-[11px] text-slate-400">Sistem Pelacakan Paket Real-Time</p>
+                </div>
+            </div>
+            <button onclick="openAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-user-gear"></i> Panel Admin
+            </button>
+        </div>
+    </header>
+
+    <!-- Content Utama -->
+    <main class="max-w-5xl mx-auto px-4 py-8 w-full flex-1">
+
+        <!-- Banner Pencarian Resi -->
+        <section class="text-center max-w-2xl mx-auto mb-10">
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white mb-3 tracking-tight">Lacak Lokasi Paket Anda</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Masukkan nomor resi pengiriman untuk melihat posisi fisik paket, rute perjalanan, dan estimasi waktu sampai.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-2 bg-slate-900 p-2 rounded-2xl border border-slate-800 shadow-xl">
+                <input type="text" id="resiInput" placeholder="Contoh: PM-2026-001" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 uppercase tracking-wider">
+                <button onclick="trackPackage()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass"></i> Lacak Paket
+                </button>
+            </div>
+            <div class="mt-3 text-left sm:text-center">
+                <span class="text-[11px] text-slate-500">Coba Resi Contoh: </span>
+                <button onclick="quickSearch('PM-2026-001')" class="text-xs text-blue-400 underline hover:text-blue-300 font-mono font-semibold mr-2">PM-2026-001</button>
+                <button onclick="quickSearch('PM-2026-002')" class="text-xs text-blue-400 underline hover:text-blue-300 font-mono font-semibold">PM-2026-002</button>
+            </div>
+        </section>
+
+        <!-- Informasi Error jika Resi Tidak Ditemukan -->
+        <div id="notFoundBox" class="hidden max-w-2xl mx-auto bg-red-950/40 border border-red-800/50 p-4 rounded-2xl text-center text-xs text-red-300 mb-8">
+            <i class="fa-solid fa-circle-exclamation text-xl mb-2 text-red-400"></i>
+            <p class="font-bold">Nomor resi tidak ditemukan dalam sistem!</p>
+            <p class="text-[11px] text-slate-400 mt-1">Pastikan nomor resi yang Anda ketikkan sudah benar atau hubungi Admin pengirim.</p>
+        </div>
+
+        <!-- Tampilan Hasil Pelacakan -->
+        <div id="resultContainer" class="hidden space-y-6">
+
+            <!-- Card Summary Informasi Paket -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nomor Resi</span>
+                    <p id="displayResi" class="text-lg font-extrabold text-blue-400 font-mono mt-0.5">-</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Terakhir</span>
+                    <p id="displayStatus" class="text-sm font-extrabold text-green-400 mt-0.5">-</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Rute Pengiriman</span>
+                    <p id="displayRoute" class="text-xs font-bold text-slate-200 mt-1 truncate">-</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Sisa Jarak &amp; ETA</span>
+                    <p id="displayEta" class="text-xs font-bold text-amber-400 mt-1">-</p>
+                </div>
+            </div>
+
+            <!-- Grid Peta & Timeline -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Peta Interaktif Leaflet (8 Kolom) -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-blue-500"></i> Peta Visualisasi Rute Paket
+                        </h3>
+                        <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded-full font-semibold">OpenStreetMap</span>
+                    </div>
+                    <div id="map" class="w-full rounded-xl border border-slate-800"></div>
+                </div>
+
+                <!-- Diagram Lini Masa / Timeline (5 Kolom) -->
+                <div class="lg:col-span-5 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                    <h3 class="font-bold text-sm text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-green-500"></i> Riwayat Perjalanan (Checkpoints)
+                    </h3>
+                    
+                    <div id="timelineList" class="relative pl-6 space-y-6 border-l-2 border-slate-800 my-2">
+                        <!-- Data timeline akan di-render oleh JavaScript -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL POPUP ADMIN (LOGIN & MANAJEMEN RESI) -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <!-- Tampilan Login Admin (Sederhana) -->
+            <div id="adminLoginSection">
+                <h3 class="font-bold text-lg mb-1 text-white">Login Admin Pengelola</h3>
+                <p class="text-xs text-slate-400 mb-4">Masukkan password default untuk mengakses dashboard admin.</p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-300 font-medium mb-1">Password Admin:</label>
+                        <input type="password" id="adminPassInput" placeholder="Password (Default: admin123)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none">
+                    </div>
+                    <button onclick="verifyAdminPass()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                        Masuk Ke Panel Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tampilan Dashboard Admin (Setelah Login) -->
+            <div id="adminDashboardSection" class="hidden space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="font-bold text-base text-white">Dashboard Admin</h3>
+                        <p class="text-[10px] text-green-400">● Sesi Admin Aktif</p>
+                    </div>
+                    <button onclick="logoutAdmin()" class="text-xs text-red-400 hover:underline">Keluar</button>
+                </div>
+
+                <!-- Form Tambah Resi Baru -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wider">Buat Nomor Resi Baru</h4>
+                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: PM-2026-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="newOriginName" placeholder="Kota Asal (Contoh: Surabaya)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="newDestName" placeholder="Kota Tujuan Akhir (Contoh: Maros)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    <button onclick="createNewResi()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold text-xs py-2 rounded-lg transition">
+                        + Tambah Resi Baru
+                    </button>
+                </div>
+
+                <!-- Form Update Status / Progress Resi -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">Update Posisi / Checkpoint Paket</h4>
+                    <select id="adminSelectResi" onchange="loadAdminResiDetails()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                        <option value="">Pilih Nomor Resi...</option>
+                    </select>
+
+                    <div id="adminUpdateControl" class="hidden space-y-2 pt-2 border-t border-slate-800">
+                        <label class="block text-[11px] text-slate-400">Pilih Posisi Checkpoint Saat Ini:</label>
+                        <select id="adminSelectCheckpoint" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                        
+                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Misal: Paket Disortir)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                        
+                        <button onclick="updateResiProgress()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2 rounded-lg transition">
+                            Simpan Pembaruan Lokasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-center py-4 text-xs text-slate-500">
+        &copy; 2026 Tracking Express - Sistem Pelacakan Paket Real-Time.
+    </footer>
+
+    <!-- Script Logika Sistem -->
+    <script>
+        // Data Default Sistem (Sample Tracking Data)
+        const initialPackages = {
+            "PM-2026-001": {
+                resi: "PM-2026-001",
+                origin: "Gudang Pusat Jakarta",
+                destination: "Kota Maros",
+                currentCheckpointIndex: 2,
+                checkpoints: [
+                    { name: "Gudang Pusat Jakarta", lat: -6.2088, lng: 106.8456, status: "Paket Diproses Penjual", time: "2026-07-15 08:00", completed: true },
+                    { name: "Hub Transit Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Tiba di Hub Transit", time: "2026-07-16 14:30", completed: true },
+                    { name: "Hub Utama Makassar", lat: -5.1477, lng: 119.4327, status: "Paket Sedang Disortir", time: "2026-07-17 09:15", completed: true },
+                    { name: "Agen Kota Maros", lat: -5.0069, lng: 119.5742, status: "Menunggu Pengiriman Kurir", time: "-", completed: false }
+                ]
+            },
+            "PM-2026-002": {
+                resi: "PM-2026-002",
+                origin: "Surabaya",
+                destination: "Lumajang",
+                currentCheckpointIndex: 1,
+                checkpoints: [
+                    { name: "Gudang Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Diterima Kurir", time: "2026-07-17 06:00", completed: true },
+                    { name: "Hub Transit Probolinggo", lat: -7.7543, lng: 113.2159, status: "Sedang Dalam Perjalanan", time: "2026-07-17 11:20", completed: true },
+                    { name: "Agen Senggol Lumajang", lat: -8.1331, lng: 113.2223, status: "Menuju Tujuan Akhir", time: "-", completed: false }
+                ]
+            }
+        };
+
+        let map = null;
+        let mapMarkers = [];
+        let polylineLayer = null;
+
+        // Inisialisasi LocalStorage
+        function getDatabase() {
+            const data = localStorage.getItem('tracking_db');
+            if (!data) {
+                localStorage.setItem('tracking_db', JSON.stringify(initialPackages));
+                return initialPackages;
+            }
+            return JSON.parse(data);
+        }
+
+        function saveDatabase(db) {
+            localStorage.setItem('tracking_db', JSON.stringify(db));
+        }
+
+        // Rumus Haversine untuk Hitung Jarak (Km)
+        function calculateHaversine(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Jari-jari bumi (km)
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return Math.round(R * c);
+        }
+
+        function quickSearch(code) {
+            document.getElementById('resiInput').value = code;
+            trackPackage();
+        }
+
+        // Fungsi Utama Lacak Paket
+        function trackPackage() {
+            const resiInput = document.getElementById('resiInput').value.trim().toUpperCase();
+            const db = getDatabase();
+            const pkg = db[resiInput];
+
+            const notFoundBox = document.getElementById('notFoundBox');
+            const resultContainer = document.getElementById('resultContainer');
+
+            if (!pkg) {
+                notFoundBox.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+                return;
+            }
+
+            notFoundBox.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+
+            // Render Info Card
+            const currIdx = pkg.currentCheckpointIndex;
+            const currentCp = pkg.checkpoints[currIdx];
+            const finalCp = pkg.checkpoints[pkg.checkpoints.length - 1];
+
+            document.getElementById('displayResi').innerText = pkg.resi;
+            document.getElementById('displayStatus').innerText = currentCp.status + " (" + currentCp.name + ")";
+            document.getElementById('displayRoute').innerText = pkg.origin + " ➔ " + pkg.destination;
+
+            // Hitung Jarak Sisa Ke Tujuan Akhir
+            const remainingKm = calculateHaversine(currentCp.lat, currentCp.lng, finalCp.lat, finalCp.lng);
+            let etaText = "";
+            if (remainingKm === 0) {
+                etaText = "Tiba di Tujuan Akhir (0 km)";
+            } else {
+                const estHours = Math.ceil(remainingKm / 40); // Asumsi kecepatan rata-rata 40 km/jam
+                etaText = remainingKm + " km (" + estHours + " Jam Est. Tiba)";
+            }
+            document.getElementById('displayEta').innerText = etaText;
+
+            // Render Timeline & Peta
+            renderTimelineUI(pkg);
+            renderLeafletMap(pkg);
+        }
+
+        // Render Lini Masa (Timeline)
+        function renderTimelineUI(pkg) {
+            const timelineList = document.getElementById('timelineList');
+            timelineList.innerHTML = '';
+
+            pkg.checkpoints.forEach((cp, index) => {
+                const isPassed = index <= pkg.currentCheckpointIndex;
+                const isCurrent = index === pkg.currentCheckpointIndex;
+
+                const item = document.createElement('div');
+                item.className = "relative flex items-start gap-3";
+
+                let dotColor = "bg-slate-800 border-slate-700 text-slate-500";
+                if (isCurrent) {
+                    dotColor = "bg-blue-600 border-blue-400 text-white ring-4 ring-blue-500/20";
+                } else if (isPassed) {
+                    dotColor = "bg-green-600 border-green-500 text-white";
+                }
+
+                item.innerHTML = `
+                    <div class="absolute -left-[31px] top-0.5 w-6 h-6 rounded-full border-2 ${dotColor} flex items-center justify-center text-[10px] font-bold">
+                        ${isPassed ? '<i class="fa-solid fa-check"></i>' : (index + 1)}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-xs ${isCurrent ? 'text-blue-400' : 'text-slate-200'}">${cp.name}</h4>
+                            <span class="text-[10px] text-slate-500">${cp.time}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${cp.status}</p>
+                    </div>
+                `;
+                timelineList.appendChild(item);
+            });
+        }
+
+        // Render Peta Interaktif Leaflet
+        function renderLeafletMap(pkg) {
+            const points = pkg.checkpoints.map(cp => [cp.lat, cp.lng]);
+
+            if (!map) {
+                map = L.map('map').setView(points[0], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+            }
+
+            // Hapus marker & garis lama
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            if (polylineLayer) map.removeLayer(polylineLayer);
+
+            // Tambah Marker untuk setiap checkpoint
+            pkg.checkpoints.forEach((cp, index) => {
+                const isCurrent = index === pkg.currentCheckpointIndex;
+                const marker = L.marker([cp.lat, cp.lng]).addTo(map);
+                
+                let popupContent = `<b>${cp.name}</b><br><span style="font-size:11px;">Status: ${cp.status}</span>`;
+                if (isCurrent) popupContent += `<br><b style="color:blue;">[Posisi Paket Saat Ini]</b>`;
+                
+                marker.bindPopup(popupContent);
+                if (isCurrent) marker.openPopup();
+                
+                mapMarkers.push(marker);
+            });
+
+            // Gambar Garis Rute (Polyline)
+            polylineLayer = L.polyline(points, { color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '6, 8' }).addTo(map);
+            
+            // Auto fit bounds peta agar seluruh rute terlihat
+            map.fitBounds(polylineLayer.getBounds(), { padding: [30, 30] });
+        }
+
+        // Logika Panel Admin
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdminPass() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === 'admin123' || pass === '') {
+                document.getElementById('adminLoginSection').classList.add('hidden');
+                document.getElementById('adminDashboardSection').classList.remove('hidden');
+                populateAdminResiList();
+            } else {
+                alert('Password Admin Salah!');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminLoginSection').classList.remove('hidden');
+            document.getElementById('adminDashboardSection').classList.add('hidden');
+        }
+
+        function populateAdminResiList() {
+            const db = getDatabase();
+            const select = document.getElementById('adminSelectResi');
+            select.innerHTML = '<option value="">Pilih Nomor Resi...</option>';
+            Object.keys(db).forEach(code => {
+                select.innerHTML += `<option value="${code}">${code} (${db[code].origin} ➔ ${db[code].destination})</option>`;
+            });
+        }
+
+        function createNewResi() {
+            const code = document.getElementById('newResiCode').value.trim().toUpperCase();
+            const origin = document.getElementById('newOriginName').value.trim();
+            const dest = document.getElementById('newDestName').value.trim();
+
+            if (!code || !origin || !dest) {
+                alert('Mohon isi semua data resi!');
+                return;
+            }
+
+            const db = getDatabase();
+            db[code] = {
+                resi: code,
+                origin: origin,
+                destination: dest,
+                currentCheckpointIndex: 0,
+                checkpoints: [
+                    { name: "Gudang " + origin, lat: -6.2088, lng: 106.8456, status: "Paket Diproses", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
+                    { name: "Hub Transit Tengah", lat: -7.2575, lng: 112.7521, status: "Dalam Perjalanan Transit", time: "-", completed: false },
+                    { name: "Agen " + dest, lat: -5.0069, lng: 119.5742, status: "Tiba di Kota Tujuan", time: "-", completed: false }
+                ]
+            };
+
+            saveDatabase(db);
+            alert('Resi ' + code + ' Berhasil Dibuat!');
+            populateAdminResiList();
+        }
+
+        function loadAdminResiDetails() {
+            const code = document.getElementById('adminSelectResi').value;
+            const controlBox = document.getElementById('adminUpdateControl');
+            if (!code) {
+                controlBox.classList.add('hidden');
+                return;
+            }
+
+            const db = getDatabase();
+            const pkg = db[code];
+            const cpSelect = document.getElementById('adminSelectCheckpoint');
+            cpSelect.innerHTML = '';
+
+            pkg.checkpoints.forEach((cp, i) => {
+                cpSelect.innerHTML += `<option value="${i}" ${i === pkg.currentCheckpointIndex ? 'selected' : ''}>${i + 1}. ${cp.name}</option>`;
+            });
+
+            controlBox.classList.remove('hidden');
+        }
+
+        function updateResiProgress() {
+            const code = document.getElementById('adminSelectResi').value;
+            const cpIndex = parseInt(document.getElementById('adminSelectCheckpoint').value);
+            const customStatus = document.getElementById('adminStatusText').value.trim();
+
+            const db = getDatabase();
+            db[code].currentCheckpointIndex = cpIndex;
+            db[code].checkpoints[cpIndex].time = new Date().toISOString().slice(0,16).replace('T',' ');
+            if (customStatus) {
+                db[code].checkpoints[cpIndex].status = customStatus;
+            }
+
+            saveDatabase(db);
+            alert('Lokasi & Status Resi ' + code + ' Berhasil Diperbarui!');
+            quickSearch(code);
+            closeAdminModal();
+        }
+
+        // Jalankan Lacak Otomatis Resi Contoh saat pertama dibuka
+        quickSearch('PM-2026-001');
+    </script>
+</body>
+</html>
