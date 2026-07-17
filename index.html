@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM EXPRESS - Sistem Pelacakan Paket Real-Time</title>
+    <title>PM EXPRESS - Sistem Pelacakan Paket Pulau Jawa</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -34,10 +34,10 @@
                 </div>
             </div>
 
-            <!-- Tanda Online Cloud Status -->
+            <!-- Tanda Status System -->
             <div class="flex items-center gap-2 bg-red-800/60 border border-red-500/40 text-white text-[10px] px-3 py-1.5 rounded-full font-bold">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>GitHub Sync Online</span>
+                <span>Rute GPS Live</span>
             </div>
         </div>
     </header>
@@ -69,7 +69,7 @@
         <!-- Loading Indicator -->
         <div id="loadingBox" class="hidden max-w-md mx-auto text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p class="text-xs text-slate-400 font-semibold">Memuat data resmi dari GitHub Repository...</p>
+            <p class="text-xs text-slate-400 font-semibold">Memuat rute perjalanan dari server...</p>
         </div>
 
         <!-- Informasi Error jika Resi Tidak Ditemukan -->
@@ -110,7 +110,7 @@
                         <h3 class="font-bold text-sm text-white flex items-center gap-2">
                             <i class="fa-solid fa-map-location-dot text-red-500"></i> Visualisasi Rute Peta
                         </h3>
-                        <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-0.5 rounded-full font-bold">Live GPS</span>
+                        <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-0.5 rounded-full font-bold">Interactive Route</span>
                     </div>
                     <div id="map" class="w-full rounded-xl border border-slate-800"></div>
                 </div>
@@ -127,9 +127,9 @@
 
     </main>
 
-    <!-- MODAL POPUP ADMIN (TERSEMBUNYI) -->
+    <!-- MODAL POPUP ADMIN (KONTROL RUTE DINAMIS) -->
     <div id="adminModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-xl rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -154,45 +154,90 @@
             </div>
 
             <!-- Tampilan Dashboard Admin -->
-            <div id="adminDashboardSection" class="hidden space-y-5">
+            <div id="adminDashboardSection" class="hidden space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div>
-                        <h3 class="font-bold text-base text-white">Dashboard Admin PM EXPRESS</h3>
-                        <p class="text-[10px] text-emerald-400">● Generator Data Resi GitHub</p>
+                        <h3 class="font-bold text-base text-white">Dashboard Kontrol Rute Admin</h3>
+                        <p class="text-[10px] text-emerald-400">● Generator Data Resi Dinamis</p>
                     </div>
                     <button onclick="logoutAdmin()" class="text-xs text-slate-400 hover:underline py-1">Keluar</button>
                 </div>
 
-                <!-- Form Generator Resi Baru -->
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 class="font-bold text-xs text-red-400 uppercase tracking-wider">+ Buat / Update Resi Baru</h4>
-                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: JNT-LMJ-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 uppercase font-mono">
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-1">Kota Asal (Pengirim):</label>
-                            <select id="newOriginSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                <!-- TABS PILIHAN AKSI: (1) Buat Resi Baru | (2) Update Posisi/Status -->
+                <div class="flex border-b border-slate-800 gap-2">
+                    <button onclick="switchAdminTab('create')" id="tabBtnCreate" class="flex-1 py-2 text-xs font-bold text-red-400 border-b-2 border-red-500">
+                        + Buat Rute Resi Baru
+                    </button>
+                    <button onclick="switchAdminTab('update')" id="tabBtnUpdate" class="flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent">
+                        🔄 Update Pergerakan Paket
+                    </button>
+                </div>
+
+                <!-- BAGIAN 1: BUILDER RUTE RESI BARU -->
+                <div id="sectionCreateResi" class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-300 font-bold mb-1">Nomor Resi Baru:</label>
+                        <input type="text" id="newResiCode" placeholder="Contoh: JNT-LMJ-003" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 uppercase font-mono font-bold">
+                    </div>
+
+                    <!-- Pilihan Titik-Titik Transit Dinamis -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[11px] text-slate-300 font-bold">Urutan Titik Perjalanan Paket (Checkpoints):</label>
+                            <button onclick="addTransitCityRow()" class="text-[10px] bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 px-2 py-1 rounded">
+                                + Tambah Titik Transit
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 mb-1">Kota Tujuan Akhir:</label>
-                            <select id="newDestSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                        <p class="text-[10px] text-slate-500 mb-2">Atur kota dari paling awal (pengirim) hingga paling akhir (tujuan).</p>
+                        
+                        <div id="cityRowsContainer" class="space-y-2">
+                            <!-- Rows di-generate oleh JS -->
                         </div>
                     </div>
 
-                    <button onclick="generateResiJSON()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md">
-                        ⚡ Generate Teks JSON untuk GitHub
+                    <button onclick="generateNewResiJSON()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md mt-2">
+                        ⚡ Generate JSON Rute Baru
                     </button>
+                </div>
 
-                    <!-- Output Teks JSON Hasil Generate -->
-                    <div id="jsonOutputBox" class="hidden space-y-2 pt-2 border-t border-slate-800">
-                        <p class="text-[11px] text-emerald-400 font-semibold"> Salin seluruh teks di bawah ini dan tempelkan (*paste*) ke dalam file <code class="bg-slate-900 px-1 py-0.5 rounded text-white">data.json</code> di GitHub Anda:</p>
-                        <textarea id="jsonTextArea" rows="5" readonly class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-[10px] font-mono text-slate-300 focus:outline-none"></textarea>
+                <!-- BAGIAN 2: UPDATE PERGERAKAN / LOKASI PAKET -->
+                <div id="sectionUpdateResi" class="hidden space-y-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-300 font-bold mb-1">Pilih Resi Yang Ingin Di-update:</label>
+                        <select id="adminSelectResi" onchange="loadAdminResiDetails()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                            <option value="">Pilih Nomor Resi...</option>
+                        </select>
+                    </div>
+
+                    <div id="adminUpdateControl" class="hidden space-y-3 pt-2 border-t border-slate-800">
+                        <div>
+                            <label class="block text-[11px] text-slate-300 font-bold mb-1">Posisi Fisik Paket Saat Ini:</label>
+                            <select id="adminSelectCheckpoint" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                        </div>
                         
-                        <button onclick="copyGeneratedJSON()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition">
-                            <i class="fa-solid fa-copy"></i> Salin Seluruh Isi data.json Baru
+                        <div>
+                            <label class="block text-[11px] text-slate-300 font-bold mb-1">Ketik Status Pergerakan / Keterangan Paket:</label>
+                            <input type="text" id="adminStatusText" placeholder="Contoh: Paket Berhenti &amp; Disortir di PM STORE Lumajang" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200">
+                        </div>
+                        
+                        <button onclick="generateUpdatedResiJSON()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md">
+                            ⚡ Generate JSON Perubahan Status
                         </button>
                     </div>
                 </div>
+
+                <!-- BOX OUTPUT JSON UNTUK DISALIN KE GITHUB DATA.JSON -->
+                <div id="jsonOutputBox" class="hidden space-y-2 pt-3 border-t-2 border-dashed border-slate-800">
+                    <p class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Kode Berhasil Di-generate! Salin dan tempelkan ke file <code class="bg-slate-950 text-white px-1 py-0.5 rounded">data.json</code> di GitHub:
+                    </p>
+                    <textarea id="jsonTextArea" rows="6" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[10px] font-mono text-slate-300 focus:outline-none"></textarea>
+                    
+                    <button onclick="copyGeneratedJSON()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-copy"></i> Salin Seluruh Isi data.json Baru
+                    </button>
+                </div>
+
             </div>
 
         </div>
@@ -206,7 +251,7 @@
         </button>
     </footer>
 
-    <!-- Script Logika GitHub Read Engine -->
+    <!-- Script Logika Kontrol Perjalanan Dinamis -->
     <script>
         const JAVA_CITIES = {
             "Jakarta": { lat: -6.2088, lng: 106.8456, hubName: "Gudang Utama Jakarta" },
@@ -221,7 +266,7 @@
             "Surabaya": { lat: -7.2575, lng: 112.7521, hubName: "Gudang Utama Surabaya" },
             "Malang": { lat: -7.9666, lng: 112.6326, hubName: "Hub Transit Malang" },
             "Probolinggo": { lat: -7.7543, lng: 113.2159, hubName: "Hub Transit Probolinggo" },
-            "Lumajang (Pusat PM STORE)": { lat: -8.1331, lng: 113.2223, hubName: "Pusat Penyortiran PM STORE Lumajang" },
+            "Lumajang (PM STORE)": { lat: -8.1331, lng: 113.2223, hubName: "Pusat Penyortiran PM STORE Lumajang" },
             "Jember": { lat: -8.1845, lng: 113.6681, hubName: "Drop Point Jember" },
             "Banyuwangi": { lat: -8.2192, lng: 114.3691, hubName: "Drop Point Banyuwangi" }
         };
@@ -249,7 +294,7 @@
             trackPackage();
         }
 
-        // BACA DATA DARI DATA.JSON REPOSITORY GITHUB
+        // AMBIL DATA DARI DATA.JSON REPOSITORY GITHUB
         async function fetchResiFromGitHubRepo() {
             try {
                 const response = await fetch('./data.json?t=' + Date.now());
@@ -258,12 +303,12 @@
                     return currentFullDatabase;
                 }
             } catch (e) {
-                console.log("Error loading data.json:", e);
+                console.log("Fetch data.json error:", e);
             }
             return currentFullDatabase;
         }
 
-        // FUNGSI UTAMA CEK RESI UNTUK PEMBELI
+        // FUNGSI UTAMA CEK RESI
         async function trackPackage() {
             const resiInput = document.getElementById('resiInput').value.trim().toUpperCase();
             if (!resiInput) return;
@@ -296,10 +341,11 @@
             document.getElementById('displayStatus').innerText = currentCp.status;
             document.getElementById('displayRoute').innerText = pkg.origin + " ➔ " + pkg.destination;
 
+            // Hitung sisa jarak dari checkpoint AKTIF saat ini ke tujuan akhir
             const remainingKm = calculateHaversine(currentCp.lat, currentCp.lng, finalCp.lat, finalCp.lng);
             let etaText = "";
             if (remainingKm === 0) {
-                etaText = "Tiba di Kota Tujuan (0 km)";
+                etaText = "Tiba di Tujuan Akhir (0 km)";
             } else {
                 const estHours = Math.ceil(remainingKm / 45);
                 etaText = remainingKm + " km (" + estHours + " Jam Est. Tiba)";
@@ -376,6 +422,7 @@
             map.fitBounds(polylineLayer.getBounds(), { padding: [40, 40] });
         }
 
+        // MODAL ADMIN CONTROL
         function handleLogoTripleClick() {
             logoClickCount++;
             clearTimeout(logoTimer);
@@ -389,7 +436,7 @@
 
         function openAdminModal() {
             document.getElementById('adminModal').classList.remove('hidden');
-            populateCityDropdowns();
+            initDefaultCityRows();
         }
 
         function closeAdminModal() {
@@ -401,6 +448,7 @@
             if (pass === 'pmstore2026' || pass === 'admin123') {
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminDashboardSection').classList.remove('hidden');
+                populateAdminResiDropdown();
             } else {
                 alert('Password Admin Salah!');
             }
@@ -411,51 +459,143 @@
             document.getElementById('adminDashboardSection').classList.add('hidden');
         }
 
-        function populateCityDropdowns() {
-            const originSel = document.getElementById('newOriginSelect');
-            const destSel = document.getElementById('newDestSelect');
-            originSel.innerHTML = '';
-            destSel.innerHTML = '';
-
-            Object.keys(JAVA_CITIES).forEach(city => {
-                originSel.innerHTML += `<option value="${city}">${city}</option>`;
-                destSel.innerHTML += `<option value="${city}">${city}</option>`;
-            });
-            originSel.value = "Jakarta";
-            destSel.value = "Jember";
+        function switchAdminTab(tab) {
+            document.getElementById('jsonOutputBox').classList.add('hidden');
+            if (tab === 'create') {
+                document.getElementById('sectionCreateResi').classList.remove('hidden');
+                document.getElementById('sectionUpdateResi').classList.add('hidden');
+                document.getElementById('tabBtnCreate').className = "flex-1 py-2 text-xs font-bold text-red-400 border-b-2 border-red-500";
+                document.getElementById('tabBtnUpdate').className = "flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent";
+            } else {
+                document.getElementById('sectionCreateResi').classList.add('hidden');
+                document.getElementById('sectionUpdateResi').classList.remove('hidden');
+                document.getElementById('tabBtnCreate').className = "flex-1 py-2 text-xs font-bold text-slate-400 border-b-2 border-transparent";
+                document.getElementById('tabBtnUpdate').className = "flex-1 py-2 text-xs font-bold text-amber-400 border-b-2 border-amber-500";
+                populateAdminResiDropdown();
+            }
         }
 
-        // GENERATE KODE JSON RESI BARU UNTUK DISALIN KE GITHUB
-        async function generateResiJSON() {
-            const code = document.getElementById('newResiCode').value.trim().toUpperCase();
-            const originCity = document.getElementById('newOriginSelect').value;
-            const destCity = document.getElementById('newDestSelect').value;
+        // GENERATOR KOTA TRANSIT DINAMIS
+        function initDefaultCityRows() {
+            const container = document.getElementById('cityRowsContainer');
+            container.innerHTML = '';
+            addTransitCityRow("Jakarta", "1. Kota Awal (Pengirim)");
+            addTransitCityRow("Lumajang (PM STORE)", "2. Hub Transit/Sortir");
+            addTransitCityRow("Jember", "3. Kota Tujuan Akhir");
+        }
 
+        function addTransitCityRow(selectedCity = "Surabaya", labelText = "") {
+            const container = document.getElementById('cityRowsContainer');
+            const rowCount = container.children.length + 1;
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-2 bg-slate-950 p-2 rounded-lg border border-slate-800";
+
+            let selectHTML = `<select class="city-select-item flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-xs text-slate-200">`;
+            Object.keys(JAVA_CITIES).forEach(city => {
+                selectHTML += `<option value="${city}" ${city === selectedCity ? 'selected' : ''}>${city}</option>`;
+            });
+            selectHTML += `</select>`;
+
+            row.innerHTML = `
+                <span class="text-[10px] font-bold text-slate-400 min-w-[20px]">${rowCount}.</span>
+                ${selectHTML}
+                <button onclick="this.parentElement.remove()" class="text-xs text-red-400 hover:text-red-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        async function generateNewResiJSON() {
+            const code = document.getElementById('newResiCode').value.trim().toUpperCase();
             if (!code) {
-                alert('Mohon masukkan Kode Resi!');
+                alert('Mohon ketikkan Kode Resi!');
                 return;
             }
 
-            const originData = JAVA_CITIES[originCity];
-            const destData = JAVA_CITIES[destCity];
-            const lmjData = JAVA_CITIES["Lumajang (Pusat PM STORE)"];
+            const citySelects = document.querySelectorAll('.city-select-item');
+            if (citySelects.length < 2) {
+                alert('Minimal tentukan 2 kota (Kota Awal & Kota Tujuan)!');
+                return;
+            }
+
+            const checkpoints = [];
+            citySelects.forEach((sel, idx) => {
+                const cityName = sel.value;
+                const cityData = JAVA_CITIES[cityName];
+                let statusText = "Dalam Perjalanan Transit";
+                if (idx === 0) statusText = "Paket Diproses Penjual";
+                if (cityName.includes("PM STORE")) statusText = "Paket Disortir di PM STORE Lumajang";
+                if (idx === citySelects.length - 1) statusText = "Menunggu Pengiriman Kurir Lokal";
+
+                checkpoints.push({
+                    name: cityData.hubName,
+                    lat: cityData.lat,
+                    lng: cityData.lng,
+                    status: statusText,
+                    time: idx === 0 ? new Date().toISOString().slice(0,16).replace('T',' ') : "-"
+                });
+            });
+
+            const originName = citySelects[0].value;
+            const destName = citySelects[citySelects.length - 1].value;
 
             const db = await fetchResiFromGitHubRepo();
-            
             db[code] = {
                 resi: code,
-                origin: originCity,
-                destination: destCity,
+                origin: originName,
+                destination: destName,
                 currentCheckpointIndex: 0,
-                checkpoints: [
-                    { name: originData.hubName, lat: originData.lat, lng: originData.lng, status: "Paket Diproses di Kota Asal", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
-                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: lmjData.lat, lng: lmjData.lng, status: "Sedang Transmisi Penyortiran di Lumajang", time: "-", completed: false },
-                    { name: destData.hubName, lat: destData.lat, lng: destData.lng, status: "Tiba di Kota Tujuan Akhir", time: "-", completed: false }
-                ]
+                checkpoints: checkpoints
             };
 
-            const formattedString = JSON.stringify(db, null, 2);
-            document.getElementById('jsonTextArea').value = formattedString;
+            document.getElementById('jsonTextArea').value = JSON.stringify(db, null, 2);
+            document.getElementById('jsonOutputBox').classList.remove('hidden');
+        }
+
+        async function populateAdminResiDropdown() {
+            const db = await fetchResiFromGitHubRepo();
+            const select = document.getElementById('adminSelectResi');
+            select.innerHTML = '<option value="">Pilih Nomor Resi...</option>';
+            Object.keys(db).forEach(code => {
+                select.innerHTML += `<option value="${code}">${code} (${db[code].origin} ➔ ${db[code].destination})</option>`;
+            });
+        }
+
+        async function loadAdminResiDetails() {
+            const code = document.getElementById('adminSelectResi').value;
+            const controlBox = document.getElementById('adminUpdateControl');
+            if (!code) {
+                controlBox.classList.add('hidden');
+                return;
+            }
+
+            const db = await fetchResiFromGitHubRepo();
+            const pkg = db[code];
+            const cpSelect = document.getElementById('adminSelectCheckpoint');
+            cpSelect.innerHTML = '';
+
+            pkg.checkpoints.forEach((cp, i) => {
+                cpSelect.innerHTML += `<option value="${i}" ${i === pkg.currentCheckpointIndex ? 'selected' : ''}>Titik ${i + 1}: ${cp.name}</option>`;
+            });
+
+            document.getElementById('adminStatusText').value = pkg.checkpoints[pkg.currentCheckpointIndex].status;
+            controlBox.classList.remove('hidden');
+        }
+
+        async function generateUpdatedResiJSON() {
+            const code = document.getElementById('adminSelectResi').value;
+            const cpIndex = parseInt(document.getElementById('adminSelectCheckpoint').value);
+            const customStatus = document.getElementById('adminStatusText').value.trim();
+
+            const db = await fetchResiFromGitHubRepo();
+            const pkg = db[code];
+
+            pkg.currentCheckpointIndex = cpIndex;
+            pkg.checkpoints[cpIndex].time = new Date().toISOString().slice(0,16).replace('T',' ');
+            if (customStatus) {
+                pkg.checkpoints[cpIndex].status = customStatus;
+            }
+
+            document.getElementById('jsonTextArea').value = JSON.stringify(db, null, 2);
             document.getElementById('jsonOutputBox').classList.remove('hidden');
         }
 
@@ -463,10 +603,10 @@
             const textArea = document.getElementById('jsonTextArea');
             textArea.select();
             document.execCommand('copy');
-            alert('BERHASIL DISALIN!\n\nLangkah Terakhir:\nBuka file data.json di GitHub HP Anda, tempelkan (paste) teks ini, lalu klik Commit Changes!');
+            alert('BERHASIL DISALIN!\n\nTempelkan (paste) teks ini ke dalam file data.json di GitHub Anda lalu klik Commit Changes!');
         }
 
-        // Jalankan pelacakan awal
+        // Jalankan pelacakan awal saat website dibuka
         quickSearch('JNT-LMJ-001');
     </script>
 </body>
