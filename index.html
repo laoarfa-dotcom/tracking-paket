@@ -37,7 +37,7 @@
             <!-- Tanda Online Cloud Status -->
             <div class="flex items-center gap-2 bg-red-800/60 border border-red-500/40 text-white text-[10px] px-3 py-1.5 rounded-full font-bold">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Server Cloud Aktif</span>
+                <span>GitHub Sync Online</span>
             </div>
         </div>
     </header>
@@ -69,7 +69,7 @@
         <!-- Loading Indicator -->
         <div id="loadingBox" class="hidden max-w-md mx-auto text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p class="text-xs text-slate-400 font-semibold">Mengambil data real-time dari Server Cloud...</p>
+            <p class="text-xs text-slate-400 font-semibold">Memuat data resmi dari GitHub Repository...</p>
         </div>
 
         <!-- Informasi Error jika Resi Tidak Ditemukan -->
@@ -158,14 +158,14 @@
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div>
                         <h3 class="font-bold text-base text-white">Dashboard Admin PM EXPRESS</h3>
-                        <p class="text-[10px] text-emerald-400">● Tersambung Cloud Database Online</p>
+                        <p class="text-[10px] text-emerald-400">● Generator Data Resi GitHub</p>
                     </div>
                     <button onclick="logoutAdmin()" class="text-xs text-slate-400 hover:underline py-1">Keluar</button>
                 </div>
 
-                <!-- Form Buat Resi Baru -->
+                <!-- Form Generator Resi Baru -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 class="font-bold text-xs text-red-400 uppercase tracking-wider">+ Buat Resi Baru (Otomatis Sync ke Pembeli)</h4>
+                    <h4 class="font-bold text-xs text-red-400 uppercase tracking-wider">+ Buat / Update Resi Baru</h4>
                     <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: JNT-LMJ-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 uppercase font-mono">
                     
                     <div class="grid grid-cols-2 gap-2">
@@ -179,26 +179,17 @@
                         </div>
                     </div>
 
-                    <button onclick="createNewResi()" id="btnCreateResi" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md">
-                        + Simpan &amp; Publish Resi Ke Cloud
+                    <button onclick="generateResiJSON()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md">
+                        ⚡ Generate Teks JSON untuk GitHub
                     </button>
-                </div>
 
-                <!-- Form Update Posisi Paket -->
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">Update Posisi / Status Paket</h4>
-                    <select id="adminSelectResi" onchange="loadAdminResiDetails()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                        <option value="">Pilih Nomor Resi...</option>
-                    </select>
-
-                    <div id="adminUpdateControl" class="hidden space-y-2 pt-2 border-t border-slate-800">
-                        <label class="block text-[11px] text-slate-400">Pilih Posisi Checkpoint Saat Ini:</label>
-                        <select id="adminSelectCheckpoint" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                    <!-- Output Teks JSON Hasil Generate -->
+                    <div id="jsonOutputBox" class="hidden space-y-2 pt-2 border-t border-slate-800">
+                        <p class="text-[11px] text-emerald-400 font-semibold"> Salin seluruh teks di bawah ini dan tempelkan (*paste*) ke dalam file <code class="bg-slate-900 px-1 py-0.5 rounded text-white">data.json</code> di GitHub Anda:</p>
+                        <textarea id="jsonTextArea" rows="5" readonly class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-[10px] font-mono text-slate-300 focus:outline-none"></textarea>
                         
-                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Contoh: Disortir di PM STORE Lumajang)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                        
-                        <button onclick="updateResiProgress()" id="btnUpdateProgress" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-md">
-                            Simpan Perubahan Ke Server Online
+                        <button onclick="copyGeneratedJSON()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition">
+                            <i class="fa-solid fa-copy"></i> Salin Seluruh Isi data.json Baru
                         </button>
                     </div>
                 </div>
@@ -215,11 +206,8 @@
         </button>
     </footer>
 
-    <!-- Script Logika Cloud Sync Reliable Engine -->
+    <!-- Script Logika GitHub Read Engine -->
     <script>
-        // ENDPOINT LIVE PUBLIC REST API (BEBAS BLOKIR & STABIL)
-        const CLOUD_API_URL = "https://api.restful-api.dev/objects";
-
         const JAVA_CITIES = {
             "Jakarta": { lat: -6.2088, lng: 106.8456, hubName: "Gudang Utama Jakarta" },
             "Bogor": { lat: -6.5971, lng: 106.7949, hubName: "Drop Point Bogor" },
@@ -238,37 +226,12 @@
             "Banyuwangi": { lat: -8.2192, lng: 114.3691, hubName: "Drop Point Banyuwangi" }
         };
 
-        const defaultPackages = {
-            "JNT-LMJ-001": {
-                resi: "JNT-LMJ-001",
-                origin: "Jakarta",
-                destination: "Jember",
-                currentCheckpointIndex: 2,
-                checkpoints: [
-                    { name: "Gudang Utama Jakarta", lat: -6.2088, lng: 106.8456, status: "Paket Di-pickup Kurir", time: "2026-07-16 08:00", completed: true },
-                    { name: "Hub Utama Semarang", lat: -6.9667, lng: 110.4167, status: "Paket Transit Jalur Pantura", time: "2026-07-16 20:30", completed: true },
-                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: -8.1331, lng: 113.2223, status: "Sedang Disortir di PM STORE Lumajang", time: "2026-07-17 09:15", completed: true },
-                    { name: "Drop Point Jember", lat: -8.1845, lng: 113.6681, status: "Menunggu Pengiriman Kurir Lokal", time: "-", completed: false }
-                ]
-            },
-            "JNT-LMJ-002": {
-                resi: "JNT-LMJ-002",
-                origin: "Surabaya",
-                destination: "Banyuwangi",
-                currentCheckpointIndex: 1,
-                checkpoints: [
-                    { name: "Gudang Utama Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Keluar Gudang Surabaya", time: "2026-07-17 06:00", completed: true },
-                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: -8.1331, lng: 113.2223, status: "Tiba di Hub PM STORE Lumajang", time: "2026-07-17 11:45", completed: true },
-                    { name: "Drop Point Banyuwangi", lat: -8.2192, lng: 114.3691, status: "Sedang Dalam Perjalanan Mobil Box", time: "-", completed: false }
-                ]
-            }
-        };
-
         let map = null;
         let mapMarkers = [];
         let polylineLayer = null;
         let logoClickCount = 0;
         let logoTimer = null;
+        let currentFullDatabase = {};
 
         function calculateHaversine(lat1, lon1, lat2, lon2) {
             const R = 6371;
@@ -286,30 +249,18 @@
             trackPackage();
         }
 
-        // CARI RESI DI CLOUD ATAU MEMORI LOKAL
-        async function fetchResiData(resiCode) {
-            // Cek lokal dulu
-            const localBackup = JSON.parse(localStorage.getItem('pm_express_db_local') || '{}');
-            if (localBackup[resiCode]) return localBackup[resiCode];
-            if (defaultPackages[resiCode]) return defaultPackages[resiCode];
-
-            // Cek ke Cloud Server
+        // BACA DATA DARI DATA.JSON REPOSITORY GITHUB
+        async function fetchResiFromGitHubRepo() {
             try {
-                const res = await fetch(CLOUD_API_URL);
-                if (res.ok) {
-                    const items = await res.json();
-                    const match = items.reverse().find(item => item.name === resiCode || (item.data && item.data.resi === resiCode));
-                    if (match && match.data) {
-                        localBackup[resiCode] = match.data;
-                        localBackup[resiCode]._cloudId = match.id;
-                        localStorage.setItem('pm_express_db_local', JSON.stringify(localBackup));
-                        return match.data;
-                    }
+                const response = await fetch('./data.json?t=' + Date.now());
+                if (response.ok) {
+                    currentFullDatabase = await response.json();
+                    return currentFullDatabase;
                 }
             } catch (e) {
-                console.log("Fetch cloud error:", e);
+                console.log("Error loading data.json:", e);
             }
-            return null;
+            return currentFullDatabase;
         }
 
         // FUNGSI UTAMA CEK RESI UNTUK PEMBELI
@@ -325,8 +276,10 @@
             notFoundBox.classList.add('hidden');
             resultContainer.classList.add('hidden');
 
-            const pkg = await fetchResiData(resiInput);
+            const db = await fetchResiFromGitHubRepo();
             loadingBox.classList.add('hidden');
+
+            const pkg = db[resiInput];
 
             if (!pkg) {
                 notFoundBox.classList.remove('hidden');
@@ -448,7 +401,6 @@
             if (pass === 'pmstore2026' || pass === 'admin123') {
                 document.getElementById('adminLoginSection').classList.add('hidden');
                 document.getElementById('adminDashboardSection').classList.remove('hidden');
-                populateAdminResiList();
             } else {
                 alert('Password Admin Salah!');
             }
@@ -473,20 +425,8 @@
             destSel.value = "Jember";
         }
 
-        function populateAdminResiList() {
-            const select = document.getElementById('adminSelectResi');
-            select.innerHTML = '<option value="">Pilih Nomor Resi...</option>';
-            
-            const localBackup = JSON.parse(localStorage.getItem('pm_express_db_local') || '{}');
-            const combined = { ...defaultPackages, ...localBackup };
-
-            Object.keys(combined).forEach(code => {
-                select.innerHTML += `<option value="${code}">${code} (${combined[code].origin} ➔ ${combined[code].destination})</option>`;
-            });
-        }
-
-        // FUNGSI UNGGAN RESI BARU KE SERVER
-        async function createNewResi() {
+        // GENERATE KODE JSON RESI BARU UNTUK DISALIN KE GITHUB
+        async function generateResiJSON() {
             const code = document.getElementById('newResiCode').value.trim().toUpperCase();
             const originCity = document.getElementById('newOriginSelect').value;
             const destCity = document.getElementById('newDestSelect').value;
@@ -496,15 +436,13 @@
                 return;
             }
 
-            const btn = document.getElementById('btnCreateResi');
-            btn.innerText = "Mengunggah Ke Cloud Server...";
-            btn.disabled = true;
-
             const originData = JAVA_CITIES[originCity];
             const destData = JAVA_CITIES[destCity];
             const lmjData = JAVA_CITIES["Lumajang (Pusat PM STORE)"];
 
-            const newPkg = {
+            const db = await fetchResiFromGitHubRepo();
+            
+            db[code] = {
                 resi: code,
                 origin: originCity,
                 destination: destCity,
@@ -516,100 +454,16 @@
                 ]
             };
 
-            // Simpan ke memori lokal HP Admin
-            const localBackup = JSON.parse(localStorage.getItem('pm_express_db_local') || '{}');
-            localBackup[code] = newPkg;
-            localStorage.setItem('pm_express_db_local', JSON.stringify(localBackup));
-
-            // Upload ke Cloud API Server RESTful
-            try {
-                const res = await fetch(CLOUD_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: code, data: newPkg })
-                });
-
-                if (res.ok) {
-                    const resultData = await res.json();
-                    localBackup[code]._cloudId = resultData.id;
-                    localStorage.setItem('pm_express_db_local', JSON.stringify(localBackup));
-
-                    alert('SUKSES 100%! Resi ' + code + ' telah resmi ter-upload ke Server Online. Pembeli bisa langsung mengeceknya sekarang!');
-                } else {
-                    alert('Tersimpan secara lokal. Resi ' + code + ' tetap bisa diakses!');
-                }
-            } catch (e) {
-                alert('Tersimpan di HP Admin. Resi ' + code + ' siap digunakan!');
-            }
-
-            btn.innerText = "+ Simpan & Publish Resi Ke Cloud";
-            btn.disabled = false;
-            populateAdminResiList();
+            const formattedString = JSON.stringify(db, null, 2);
+            document.getElementById('jsonTextArea').value = formattedString;
+            document.getElementById('jsonOutputBox').classList.remove('hidden');
         }
 
-        async function loadAdminResiDetails() {
-            const code = document.getElementById('adminSelectResi').value;
-            const controlBox = document.getElementById('adminUpdateControl');
-            if (!code) {
-                controlBox.classList.add('hidden');
-                return;
-            }
-
-            const pkg = await fetchResiData(code);
-            if (!pkg) return;
-
-            const cpSelect = document.getElementById('adminSelectCheckpoint');
-            cpSelect.innerHTML = '';
-
-            pkg.checkpoints.forEach((cp, i) => {
-                cpSelect.innerHTML += `<option value="${i}" ${i === pkg.currentCheckpointIndex ? 'selected' : ''}>${i + 1}. ${cp.name}</option>`;
-            });
-
-            controlBox.classList.remove('hidden');
-        }
-
-        async function updateResiProgress() {
-            const code = document.getElementById('adminSelectResi').value;
-            const cpIndex = parseInt(document.getElementById('adminSelectCheckpoint').value);
-            const customStatus = document.getElementById('adminStatusText').value.trim();
-
-            const btn = document.getElementById('btnUpdateProgress');
-            btn.innerText = "Memperbarui Server Online...";
-            btn.disabled = true;
-
-            const pkg = await fetchResiData(code);
-            if (pkg) {
-                pkg.currentCheckpointIndex = cpIndex;
-                pkg.checkpoints[cpIndex].time = new Date().toISOString().slice(0,16).replace('T',' ');
-                if (customStatus) {
-                    pkg.checkpoints[cpIndex].status = customStatus;
-                }
-
-                // Update lokal
-                const localBackup = JSON.parse(localStorage.getItem('pm_express_db_local') || '{}');
-                localBackup[code] = pkg;
-                localStorage.setItem('pm_express_db_local', JSON.stringify(localBackup));
-
-                // Update ke Cloud API
-                if (pkg._cloudId) {
-                    try {
-                        await fetch(`${CLOUD_API_URL}/${pkg._cloudId}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name: code, data: pkg })
-                        });
-                    } catch (e) {
-                        console.log("Cloud update error:", e);
-                    }
-                }
-            }
-
-            btn.innerText = "Simpan Perubahan Ke Server Online";
-            btn.disabled = false;
-
-            alert('SUKSES! Status & Lokasi Resi ' + code + ' sudah diperbarui!');
-            quickSearch(code);
-            closeAdminModal();
+        function copyGeneratedJSON() {
+            const textArea = document.getElementById('jsonTextArea');
+            textArea.select();
+            document.execCommand('copy');
+            alert('BERHASIL DISALIN!\n\nLangkah Terakhir:\nBuka file data.json di GitHub HP Anda, tempelkan (paste) teks ini, lalu klik Commit Changes!');
         }
 
         // Jalankan pelacakan awal
