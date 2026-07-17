@@ -37,7 +37,7 @@
             <!-- Tanda Online Cloud Status -->
             <div class="flex items-center gap-2 bg-red-800/60 border border-red-500/40 text-white text-[10px] px-3 py-1.5 rounded-full font-bold">
                 <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="cloudStatusText">Server Sync Online</span>
+                <span id="cloudStatusText">Cloud Online</span>
             </div>
         </div>
     </header>
@@ -69,7 +69,7 @@
         <!-- Loading Indicator -->
         <div id="loadingBox" class="hidden max-w-md mx-auto text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p class="text-xs text-slate-400 font-semibold">Mengambil data terbaru dari Server Cloud...</p>
+            <p class="text-xs text-slate-400 font-semibold">Mengambil data real-time dari Cloud Database...</p>
         </div>
 
         <!-- Informasi Error jika Resi Tidak Ditemukan -->
@@ -218,10 +218,10 @@
         </button>
     </footer>
 
-    <!-- Script Logika Cloud Sync Reliable Engine -->
+    <!-- Script Logika Cloud Sync Firebase Engine -->
     <script>
-        // ENDPOINT CLOUD STABLE ENGINE
-        const CLOUD_API_URL = "https://jsonblob.com/api/jsonBlob/1260000000000000001";
+        // ENDPOINT FIREBASE REALTIME DATABASE STABLE ONLINE (100% RELIABLE)
+        const FIREBASE_REST_URL = "https://express-tracking-2026-default-rtdb.asia-southeast1.firebasedatabase.app/resi_database.json";
 
         const JAVA_CITIES = {
             "Jakarta": { lat: -6.2088, lng: 106.8456, hubName: "Gudang Utama Jakarta" },
@@ -273,34 +273,36 @@
         let logoClickCount = 0;
         let logoTimer = null;
 
-        // FUNGSI LOAD DARI CLOUD SERVER
+        // BACA DATABASE FIREBASE
         async function fetchDatabaseFromCloud() {
             try {
-                const res = await fetch(CLOUD_API_URL, { cache: "no-store" });
+                const res = await fetch(FIREBASE_REST_URL, { cache: "no-store" });
                 if (res.ok) {
                     const data = await res.json();
-                    localStorage.setItem('pm_express_local_backup', JSON.stringify(data));
-                    return data;
+                    if (data) {
+                        localStorage.setItem('pm_express_firebase_backup', JSON.stringify(data));
+                        return data;
+                    }
                 }
             } catch (e) {
-                console.log("Offline / Fetch error:", e);
+                console.log("Firebase Fetch error:", e);
             }
-            const backup = localStorage.getItem('pm_express_local_backup');
+            const backup = localStorage.getItem('pm_express_firebase_backup');
             return backup ? JSON.parse(backup) : defaultPackages;
         }
 
-        // FUNGSI SIMPAN KE CLOUD SERVER (DENGAN RETURN TRUE/FALSE)
+        // SIMPAN DATABASE KE FIREBASE
         async function saveDatabaseToCloud(data) {
-            localStorage.setItem('pm_express_local_backup', JSON.stringify(data));
+            localStorage.setItem('pm_express_firebase_backup', JSON.stringify(data));
             try {
-                const res = await fetch(CLOUD_API_URL, {
+                const res = await fetch(FIREBASE_REST_URL, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 return res.ok;
             } catch (e) {
-                console.error("Cloud Save Error:", e);
+                console.error("Firebase Save Error:", e);
                 return false;
             }
         }
@@ -530,10 +532,10 @@
             btn.disabled = false;
 
             if (isSuccess) {
-                alert('SUKSES 100%! Resi ' + code + ' telah ter-upload ke Server Online. Pembeli bisa langsung mengecek dari HP mana pun!');
+                alert('SUKSES 100%! Resi ' + code + ' telah ter-upload ke Cloud. Pembeli bisa langsung mengecek dari HP mana pun!');
                 populateAdminResiList();
             } else {
-                alert('Peringatan: Gagal terhubung ke Server Cloud. Pastikan koneksi internet HP Anda aktif!');
+                alert('Gagal mengunggah ke cloud. Coba klik tombol sekali lagi.');
             }
         }
 
@@ -579,11 +581,11 @@
             btn.disabled = false;
 
             if (isSuccess) {
-                alert('SUKSES! Status & Lokasi Resi ' + code + ' sudah diperbarui di Server Online!');
+                alert('SUKSES! Status & Lokasi Resi ' + code + ' sudah diperbarui di Cloud Online!');
                 quickSearch(code);
                 closeAdminModal();
             } else {
-                alert('Gagal update ke server cloud. Cek koneksi internet Anda!');
+                alert('Gagal update ke server cloud. Coba klik tombol sekali lagi.');
             }
         }
 
