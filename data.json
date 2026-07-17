@@ -102,5 +102,37 @@
         "completed": false
       }
     ]
+  },
+  "JNT-LMJ-004": {
+    "resi": "JNT-LMJ-004",
+    "origin": "Cirebon",
+    "destination": "Banyuwangi",
+    "currentCheckpointIndex": 0,
+    "checkpoints": [
+      {
+        "name": "Hub Transit Cirebon",
+        "lat": -6.732,
+        "lng": 108.5523,
+        "status": "Paket Diproses di Kota Asal",
+        "time": "2026-07-17 15:42",
+        "completed": true
+      },
+      {
+        "name": "Pusat Penyortiran PM STORE Lumajang",
+        "lat": -8.1331,
+        "lng": 113.2223,
+        "status": "Sedang Transmisi Penyortiran di Lumajang",
+        "time": "-",
+        "completed": false
+      },
+      {
+        "name": "Drop Point Banyuwangi",
+        "lat": -8.2192,
+        "lng": 114.3691,
+        "status": "Tiba di Kota Tujuan Akhir",
+        "time": "-",
+        "completed": false
+      }
+    ]
   }
 }
