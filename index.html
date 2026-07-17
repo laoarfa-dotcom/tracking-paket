@@ -92,7 +92,7 @@
             <!-- Grid Peta & Timeline -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Peta Interaktif Leaflet (8 Kolom) -->
+                <!-- Peta Interaktif Leaflet (7 Kolom) -->
                 <div class="lg:col-span-7 bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-bold text-sm text-white flex items-center gap-2">
@@ -149,15 +149,28 @@
                         <h3 class="font-bold text-base text-white">Dashboard Admin</h3>
                         <p class="text-[10px] text-green-400">● Sesi Admin Aktif</p>
                     </div>
-                    <button onclick="logoutAdmin()" class="text-xs text-red-400 hover:underline">Keluar</button>
+                    <div class="flex gap-2">
+                        <button onclick="resetDataStorage()" class="text-xs bg-red-900/50 hover:bg-red-800 text-red-300 border border-red-700/60 px-2.5 py-1 rounded-lg">Reset Data</button>
+                        <button onclick="logoutAdmin()" class="text-xs text-slate-400 hover:underline py-1">Keluar</button>
+                    </div>
                 </div>
 
                 <!-- Form Tambah Resi Baru -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
                     <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wider">Buat Nomor Resi Baru</h4>
-                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: PM-2026-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    <input type="text" id="newOriginName" placeholder="Kota Asal (Contoh: Surabaya)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    <input type="text" id="newDestName" placeholder="Kota Tujuan Akhir (Contoh: Maros)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: PM-2026-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 uppercase">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1">Kota Asal:</label>
+                            <select id="newOriginSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1">Kota Tujuan Akhir:</label>
+                            <select id="newDestSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
+                        </div>
+                    </div>
+
                     <button onclick="createNewResi()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold text-xs py-2 rounded-lg transition">
                         + Tambah Resi Baru
                     </button>
@@ -174,7 +187,7 @@
                         <label class="block text-[11px] text-slate-400">Pilih Posisi Checkpoint Saat Ini:</label>
                         <select id="adminSelectCheckpoint" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
                         
-                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Misal: Paket Disortir)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Misal: Paket Di Sortir)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
                         
                         <button onclick="updateResiProgress()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2 rounded-lg transition">
                             Simpan Pembaruan Lokasi
@@ -193,18 +206,32 @@
 
     <!-- Script Logika Sistem -->
     <script>
-        // Data Default Sistem (Sample Tracking Data)
+        // KAMUS KOORDINAT KOTA INDONESIA (AKURAT)
+        const CITY_COORDINATES = {
+            "Makassar": { lat: -5.1477, lng: 119.4327 },
+            "Tarakan": { lat: 3.3271, lng: 117.5816 },
+            "Jakarta": { lat: -6.2088, lng: 106.8456 },
+            "Surabaya": { lat: -7.2575, lng: 112.7521 },
+            "Lumajang": { lat: -8.1331, lng: 113.2223 },
+            "Maros": { lat: -5.0069, lng: 119.5742 },
+            "Balikpapan": { lat: -1.2379, lng: 116.8529 },
+            "Samarinda": { lat: -0.5022, lng: 117.1536 },
+            "Probolinggo": { lat: -7.7543, lng: 113.2159 },
+            "Semarang": { lat: -6.9667, lng: 110.4167 },
+            "Bandung": { lat: -6.9175, lng: 107.6191 }
+        };
+
+        // Sample Data Default yang Sudah Diperbaiki Koordinatnya
         const initialPackages = {
             "PM-2026-001": {
                 resi: "PM-2026-001",
-                origin: "Gudang Pusat Jakarta",
-                destination: "Kota Maros",
-                currentCheckpointIndex: 2,
+                origin: "Makassar",
+                destination: "Tarakan",
+                currentCheckpointIndex: 0,
                 checkpoints: [
-                    { name: "Gudang Pusat Jakarta", lat: -6.2088, lng: 106.8456, status: "Paket Diproses Penjual", time: "2026-07-15 08:00", completed: true },
-                    { name: "Hub Transit Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Tiba di Hub Transit", time: "2026-07-16 14:30", completed: true },
-                    { name: "Hub Utama Makassar", lat: -5.1477, lng: 119.4327, status: "Paket Sedang Disortir", time: "2026-07-17 09:15", completed: true },
-                    { name: "Agen Kota Maros", lat: -5.0069, lng: 119.5742, status: "Menunggu Pengiriman Kurir", time: "-", completed: false }
+                    { name: "Gudang Makassar", lat: -5.1477, lng: 119.4327, status: "Paket Di Sortir", time: "2026-07-17 10:40", completed: true },
+                    { name: "Hub Transit Balikpapan", lat: -1.2379, lng: 116.8529, status: "Dalam Perjalanan Laut/Udara", time: "-", completed: false },
+                    { name: "Agen Kalimantan Tarakan", lat: 3.3271, lng: 117.5816, status: "Menuju Tujuan Akhir", time: "-", completed: false }
                 ]
             },
             "PM-2026-002": {
@@ -224,23 +251,31 @@
         let mapMarkers = [];
         let polylineLayer = null;
 
-        // Inisialisasi LocalStorage
         function getDatabase() {
-            const data = localStorage.getItem('tracking_db');
+            const data = localStorage.getItem('tracking_db_v2');
             if (!data) {
-                localStorage.setItem('tracking_db', JSON.stringify(initialPackages));
+                localStorage.setItem('tracking_db_v2', JSON.stringify(initialPackages));
                 return initialPackages;
             }
             return JSON.parse(data);
         }
 
         function saveDatabase(db) {
-            localStorage.setItem('tracking_db', JSON.stringify(db));
+            localStorage.setItem('tracking_db_v2', JSON.stringify(db));
+        }
+
+        function resetDataStorage() {
+            if (confirm("Reset seluruh data resi ke posisi awal?")) {
+                localStorage.removeItem('tracking_db_v2');
+                getDatabase();
+                alert("Database berhasil di-reset!");
+                location.reload();
+            }
         }
 
         // Rumus Haversine untuk Hitung Jarak (Km)
         function calculateHaversine(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Jari-jari bumi (km)
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -271,9 +306,8 @@
             }
 
             notFoundBox.classList.add('hidden');
-                resultContainer.classList.remove('hidden');
+            resultContainer.classList.remove('hidden');
 
-            // Render Info Card
             const currIdx = pkg.currentCheckpointIndex;
             const currentCp = pkg.checkpoints[currIdx];
             const finalCp = pkg.checkpoints[pkg.checkpoints.length - 1];
@@ -282,23 +316,20 @@
             document.getElementById('displayStatus').innerText = currentCp.status + " (" + currentCp.name + ")";
             document.getElementById('displayRoute').innerText = pkg.origin + " ➔ " + pkg.destination;
 
-            // Hitung Jarak Sisa Ke Tujuan Akhir
             const remainingKm = calculateHaversine(currentCp.lat, currentCp.lng, finalCp.lat, finalCp.lng);
             let etaText = "";
             if (remainingKm === 0) {
                 etaText = "Tiba di Tujuan Akhir (0 km)";
             } else {
-                const estHours = Math.ceil(remainingKm / 40); // Asumsi kecepatan rata-rata 40 km/jam
+                const estHours = Math.ceil(remainingKm / 40);
                 etaText = remainingKm + " km (" + estHours + " Jam Est. Tiba)";
             }
             document.getElementById('displayEta').innerText = etaText;
 
-            // Render Timeline & Peta
             renderTimelineUI(pkg);
             renderLeafletMap(pkg);
         }
 
-        // Render Lini Masa (Timeline)
         function renderTimelineUI(pkg) {
             const timelineList = document.getElementById('timelineList');
             timelineList.innerHTML = '';
@@ -333,24 +364,21 @@
             });
         }
 
-        // Render Peta Interaktif Leaflet
         function renderLeafletMap(pkg) {
             const points = pkg.checkpoints.map(cp => [cp.lat, cp.lng]);
 
             if (!map) {
-                map = L.map('map').setView(points[0], 6);
+                map = L.map('map').setView(points[0], 5);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 18,
                     attribution: '&copy; OpenStreetMap contributors'
                 }).addTo(map);
             }
 
-            // Hapus marker & garis lama
             mapMarkers.forEach(m => map.removeLayer(m));
             mapMarkers = [];
             if (polylineLayer) map.removeLayer(polylineLayer);
 
-            // Tambah Marker untuk setiap checkpoint
             pkg.checkpoints.forEach((cp, index) => {
                 const isCurrent = index === pkg.currentCheckpointIndex;
                 const marker = L.marker([cp.lat, cp.lng]).addTo(map);
@@ -364,16 +392,13 @@
                 mapMarkers.push(marker);
             });
 
-            // Gambar Garis Rute (Polyline)
             polylineLayer = L.polyline(points, { color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '6, 8' }).addTo(map);
-            
-            // Auto fit bounds peta agar seluruh rute terlihat
-            map.fitBounds(polylineLayer.getBounds(), { padding: [30, 30] });
+            map.fitBounds(polylineLayer.getBounds(), { padding: [40, 40] });
         }
 
-        // Logika Panel Admin
         function openAdminModal() {
             document.getElementById('adminModal').classList.remove('hidden');
+            populateCityDropdowns();
         }
 
         function closeAdminModal() {
@@ -396,6 +421,19 @@
             document.getElementById('adminDashboardSection').classList.add('hidden');
         }
 
+        function populateCityDropdowns() {
+            const originSel = document.getElementById('newOriginSelect');
+            const destSel = document.getElementById('newDestSelect');
+            originSel.innerHTML = '';
+            destSel.innerHTML = '';
+
+            Object.keys(CITY_COORDINATES).forEach(city => {
+                originSel.innerHTML += `<option value="${city}">${city}</option>`;
+                destSel.innerHTML += `<option value="${city}">${city}</option>`;
+            });
+            destSel.value = "Tarakan";
+        }
+
         function populateAdminResiList() {
             const db = getDatabase();
             const select = document.getElementById('adminSelectResi');
@@ -407,29 +445,31 @@
 
         function createNewResi() {
             const code = document.getElementById('newResiCode').value.trim().toUpperCase();
-            const origin = document.getElementById('newOriginName').value.trim();
-            const dest = document.getElementById('newDestName').value.trim();
+            const originCity = document.getElementById('newOriginSelect').value;
+            const destCity = document.getElementById('newDestSelect').value;
 
-            if (!code || !origin || !dest) {
-                alert('Mohon isi semua data resi!');
+            if (!code) {
+                alert('Mohon ketik Kode Resi!');
                 return;
             }
+
+            const originCoord = CITY_COORDINATES[originCity] || { lat: -5.1477, lng: 119.4327 };
+            const destCoord = CITY_COORDINATES[destCity] || { lat: 3.3271, lng: 117.5816 };
 
             const db = getDatabase();
             db[code] = {
                 resi: code,
-                origin: origin,
-                destination: dest,
+                origin: originCity,
+                destination: destCity,
                 currentCheckpointIndex: 0,
                 checkpoints: [
-                    { name: "Gudang " + origin, lat: -6.2088, lng: 106.8456, status: "Paket Diproses", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
-                    { name: "Hub Transit Tengah", lat: -7.2575, lng: 112.7521, status: "Dalam Perjalanan Transit", time: "-", completed: false },
-                    { name: "Agen " + dest, lat: -5.0069, lng: 119.5742, status: "Tiba di Kota Tujuan", time: "-", completed: false }
+                    { name: "Gudang " + originCity, lat: originCoord.lat, lng: originCoord.lng, status: "Paket Di Sortir", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
+                    { name: "Hub Transit " + destCity, lat: destCoord.lat, lng: destCoord.lng, status: "Tiba di Kota Tujuan", time: "-", completed: false }
                 ]
             };
 
             saveDatabase(db);
-            alert('Resi ' + code + ' Berhasil Dibuat!');
+            alert('Resi ' + code + ' Berhasil Dibuat dengan Koordinat Akurat!');
             populateAdminResiList();
         }
 
@@ -471,7 +511,7 @@
             closeAdminModal();
         }
 
-        // Jalankan Lacak Otomatis Resi Contoh saat pertama dibuka
+        // Jalankan Lacak Otomatis Resi PM-2026-001 saat pertama dibuka
         quickSearch('PM-2026-001');
     </script>
 </body>
