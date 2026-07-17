@@ -9,33 +9,29 @@
         "name": "Gudang Utama Jakarta",
         "lat": -6.2088,
         "lng": 106.8456,
-        "status": "Paket Di-pickup Kurir",
-        "time": "2026-07-16 08:00",
-        "completed": true
+        "status": "Paket Diproses Penjual",
+        "time": "2026-07-16 08:00"
       },
       {
-        "name": "Hub Utama Semarang",
+        "name": "Hub Transit Semarang",
         "lat": -6.9667,
         "lng": 110.4167,
-        "status": "Paket Transit Jalur Pantura",
-        "time": "2026-07-16 20:30",
-        "completed": true
+        "status": "Paket Transit - Berhenti Disortir",
+        "time": "2026-07-16 20:30"
       },
       {
         "name": "Pusat Penyortiran PM STORE Lumajang",
         "lat": -8.1331,
         "lng": 113.2223,
-        "status": "Sedang Disortir di PM STORE Lumajang",
-        "time": "2026-07-17 09:15",
-        "completed": true
+        "status": "Paket Tiba di Hub PM STORE Lumajang",
+        "time": "2026-07-17 09:15"
       },
       {
         "name": "Drop Point Jember",
         "lat": -8.1845,
         "lng": 113.6681,
-        "status": "Menunggu Pengiriman Kurir Lokal",
-        "time": "-",
-        "completed": false
+        "status": "Dalam Perjalanan Kurir Lokal",
+        "time": "-"
       }
     ]
   },
@@ -50,88 +46,21 @@
         "lat": -7.2575,
         "lng": 112.7521,
         "status": "Paket Keluar Gudang Surabaya",
-        "time": "2026-07-17 06:00",
-        "completed": true
+        "time": "2026-07-17 06:00"
       },
       {
         "name": "Pusat Penyortiran PM STORE Lumajang",
         "lat": -8.1331,
         "lng": 113.2223,
-        "status": "Tiba di Hub PM STORE Lumajang",
-        "time": "2026-07-17 11:45",
-        "completed": true
+        "status": "Paket Sedang Transit & Disortir",
+        "time": "2026-07-17 11:45"
       },
       {
         "name": "Drop Point Banyuwangi",
         "lat": -8.2192,
         "lng": 114.3691,
-        "status": "Sedang Dalam Perjalanan Mobil Box",
-        "time": "-",
-        "completed": false
-      }
-    ]
-  },
-  "JNT-LMJ-003": {
-    "resi": "JNT-LMJ-003",
-    "origin": "Lumajang (Pusat PM STORE)",
-    "destination": "Probolinggo",
-    "currentCheckpointIndex": 0,
-    "checkpoints": [
-      {
-        "name": "Pusat Penyortiran PM STORE Lumajang",
-        "lat": -8.1331,
-        "lng": 113.2223,
-        "status": "Paket Diproses di Kota Asal",
-        "time": "2026-07-17 15:36",
-        "completed": true
-      },
-      {
-        "name": "Pusat Penyortiran PM STORE Lumajang",
-        "lat": -8.1331,
-        "lng": 113.2223,
-        "status": "Sedang Transmisi Penyortiran di Lumajang",
-        "time": "-",
-        "completed": false
-      },
-      {
-        "name": "Hub Transit Probolinggo",
-        "lat": -7.7543,
-        "lng": 113.2159,
-        "status": "Tiba di Kota Tujuan Akhir",
-        "time": "-",
-        "completed": false
-      }
-    ]
-  },
-  "JNT-LMJ-004": {
-    "resi": "JNT-LMJ-004",
-    "origin": "Cirebon",
-    "destination": "Banyuwangi",
-    "currentCheckpointIndex": 0,
-    "checkpoints": [
-      {
-        "name": "Hub Transit Cirebon",
-        "lat": -6.732,
-        "lng": 108.5523,
-        "status": "Paket Diproses di Kota Asal",
-        "time": "2026-07-17 15:42",
-        "completed": true
-      },
-      {
-        "name": "Pusat Penyortiran PM STORE Lumajang",
-        "lat": -8.1331,
-        "lng": 113.2223,
-        "status": "Sedang Transmisi Penyortiran di Lumajang",
-        "time": "-",
-        "completed": false
-      },
-      {
-        "name": "Drop Point Banyuwangi",
-        "lat": -8.2192,
-        "lng": 114.3691,
-        "status": "Tiba di Kota Tujuan Akhir",
-        "time": "-",
-        "completed": false
+        "status": "Menuju Alamat Penerima",
+        "time": "-"
       }
     ]
   }
