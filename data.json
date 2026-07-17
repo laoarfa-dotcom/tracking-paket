@@ -68,7 +68,7 @@
     "resi": "JNT-LMJ-003",
     "origin": "Lumajang (PM STORE)",
     "destination": "Jakarta",
-    "currentCheckpointIndex": 0,
+    "currentCheckpointIndex": 1,
     "checkpoints": [
       {
         "name": "Pusat Penyortiran PM STORE Lumajang",
@@ -81,8 +81,8 @@
         "name": "Hub Transit Bandung",
         "lat": -6.9175,
         "lng": 107.6191,
-        "status": "Dalam Perjalanan Transit",
-        "time": "-"
+        "status": "Paket telah tiba di hub penyortiran Kota Bandung",
+        "time": "2026-07-17 16:30"
       },
       {
         "name": "Gudang Utama Jakarta",
