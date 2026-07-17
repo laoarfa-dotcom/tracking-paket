@@ -3,7 +3,7 @@
     "resi": "JNT-LMJ-001",
     "origin": "Jakarta",
     "destination": "Jember",
-    "currentCheckpointIndex": 2,
+    "currentCheckpointIndex": 1,
     "checkpoints": [
       {
         "name": "Gudang Utama Jakarta",
@@ -16,8 +16,8 @@
         "name": "Hub Transit Semarang",
         "lat": -6.9667,
         "lng": 110.4167,
-        "status": "Paket Transit - Berhenti Disortir",
-        "time": "2026-07-16 20:30"
+        "status": "Paket Transit",
+        "time": "2026-07-17 16:15"
       },
       {
         "name": "Pusat Penyortiran PM STORE Lumajang",
