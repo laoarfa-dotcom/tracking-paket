@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pelacakan Paket Online</title>
+    <title>PM EXPRESS - Sistem Pelacakan Paket Pulau Jawa</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
@@ -13,27 +13,27 @@
     <!-- Leaflet.js JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        #map { height: 380px; z-index: 10; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        #map { height: 400px; z-index: 10; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+    <!-- Header Ala J&T Express -->
+    <header class="bg-red-600 border-b-4 border-red-700 sticky top-0 z-30 shadow-xl">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600/20 text-blue-400 rounded-xl flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-truck-fast text-xl"></i>
+                <div class="w-10 h-10 bg-white text-red-600 rounded-xl flex items-center justify-center font-black shadow-md">
+                    <i class="fa-solid fa-bolt text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">TRACKING EXPRESS</h1>
-                    <p class="text-[11px] text-slate-400">Sistem Pelacakan Paket Real-Time</p>
+                    <h1 class="font-extrabold text-lg sm:text-xl tracking-wider text-white italic leading-tight">PM EXPRESS</h1>
+                    <p class="text-[10px] text-red-100 font-medium">Pusat Sortir: PM STORE Pasar Senggol Lumajang</p>
                 </div>
             </div>
-            <button onclick="openAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                <i class="fa-solid fa-user-gear"></i> Panel Admin
+            <button onclick="openAdminModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition border border-slate-700 shadow-md">
+                <i class="fa-solid fa-user-gear text-red-500"></i> Panel Admin
             </button>
         </div>
     </header>
@@ -41,29 +41,32 @@
     <!-- Content Utama -->
     <main class="max-w-5xl mx-auto px-4 py-8 w-full flex-1">
 
-        <!-- Banner Pencarian Resi -->
+        <!-- Banner Pencarian Resi Ala J&T -->
         <section class="text-center max-w-2xl mx-auto mb-10">
-            <h2 class="text-2xl sm:text-4xl font-extrabold text-white mb-3 tracking-tight">Lacak Lokasi Paket Anda</h2>
-            <p class="text-slate-400 text-xs sm:text-sm mb-6">Masukkan nomor resi pengiriman untuk melihat posisi fisik paket, rute perjalanan, dan estimasi waktu sampai.</p>
+            <span class="bg-red-500/10 text-red-400 border border-red-500/20 text-[11px] px-3.5 py-1 rounded-full uppercase tracking-wider font-extrabold mb-3 inline-block">
+                Express Delivery All Java Island 🚚
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white mb-3 tracking-tight">Lacak Posisi Paket Anda</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Cek rute transit di Pulau Jawa, posisi fisik paket, dan estimasi waktu tiba secara real-time.</p>
             
-            <div class="flex flex-col sm:flex-row gap-2 bg-slate-900 p-2 rounded-2xl border border-slate-800 shadow-xl">
-                <input type="text" id="resiInput" placeholder="Contoh: PM-2026-001" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 uppercase tracking-wider">
-                <button onclick="trackPackage()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <div class="flex flex-col sm:flex-row gap-2 bg-slate-900 p-2 rounded-2xl border border-red-900/40 shadow-2xl">
+                <input type="text" id="resiInput" placeholder="Masukkan No. Resi (Contoh: JNT-LMJ-001)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 uppercase tracking-wider font-mono font-bold">
+                <button onclick="trackPackage()" class="bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs sm:text-sm px-7 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
                     <i class="fa-solid fa-magnifying-glass"></i> Lacak Paket
                 </button>
             </div>
             <div class="mt-3 text-left sm:text-center">
-                <span class="text-[11px] text-slate-500">Coba Resi Contoh: </span>
-                <button onclick="quickSearch('PM-2026-001')" class="text-xs text-blue-400 underline hover:text-blue-300 font-mono font-semibold mr-2">PM-2026-001</button>
-                <button onclick="quickSearch('PM-2026-002')" class="text-xs text-blue-400 underline hover:text-blue-300 font-mono font-semibold">PM-2026-002</button>
+                <span class="text-[11px] text-slate-500">Coba Contoh Resi: </span>
+                <button onclick="quickSearch('JNT-LMJ-001')" class="text-xs text-red-400 underline hover:text-red-300 font-mono font-bold mr-3">JNT-LMJ-001</button>
+                <button onclick="quickSearch('JNT-LMJ-002')" class="text-xs text-red-400 underline hover:text-red-300 font-mono font-bold">JNT-LMJ-002</button>
             </div>
         </section>
 
         <!-- Informasi Error jika Resi Tidak Ditemukan -->
         <div id="notFoundBox" class="hidden max-w-2xl mx-auto bg-red-950/40 border border-red-800/50 p-4 rounded-2xl text-center text-xs text-red-300 mb-8">
             <i class="fa-solid fa-circle-exclamation text-xl mb-2 text-red-400"></i>
-            <p class="font-bold">Nomor resi tidak ditemukan dalam sistem!</p>
-            <p class="text-[11px] text-slate-400 mt-1">Pastikan nomor resi yang Anda ketikkan sudah benar atau hubungi Admin pengirim.</p>
+            <p class="font-bold">Nomor resi tidak ditemukan dalam sistem PM EXPRESS!</p>
+            <p class="text-[11px] text-slate-400 mt-1">Pastikan nomor resi yang Anda masukkan sudah benar.</p>
         </div>
 
         <!-- Tampilan Hasil Pelacakan -->
@@ -72,19 +75,19 @@
             <!-- Card Summary Informasi Paket -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nomor Resi</span>
-                    <p id="displayResi" class="text-lg font-extrabold text-blue-400 font-mono mt-0.5">-</p>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nomor Resi</span>
+                    <p id="displayResi" class="text-lg font-extrabold text-red-500 font-mono mt-0.5">-</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Terakhir</span>
-                    <p id="displayStatus" class="text-sm font-extrabold text-green-400 mt-0.5">-</p>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Status Terakhir</span>
+                    <p id="displayStatus" class="text-sm font-extrabold text-emerald-400 mt-0.5">-</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Rute Pengiriman</span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Rute Pengiriman</span>
                     <p id="displayRoute" class="text-xs font-bold text-slate-200 mt-1 truncate">-</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Sisa Jarak &amp; ETA</span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sisa Jarak &amp; ETA</span>
                     <p id="displayEta" class="text-xs font-bold text-amber-400 mt-1">-</p>
                 </div>
             </div>
@@ -96,17 +99,17 @@
                 <div class="lg:col-span-7 bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-bold text-sm text-white flex items-center gap-2">
-                            <i class="fa-solid fa-map-location-dot text-blue-500"></i> Peta Visualisasi Rute Paket
+                            <i class="fa-solid fa-map-location-dot text-red-500"></i> Visualisasi Rute Peta Pulau Jawa
                         </h3>
-                        <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded-full font-semibold">OpenStreetMap</span>
+                        <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-0.5 rounded-full font-bold">Peta Express</span>
                     </div>
                     <div id="map" class="w-full rounded-xl border border-slate-800"></div>
                 </div>
 
-                <!-- Diagram Lini Masa / Timeline (5 Kolom) -->
+                <!-- Diagram Lini Masa / Timeline Ala J&T (5 Kolom) -->
                 <div class="lg:col-span-5 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                     <h3 class="font-bold text-sm text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-timeline text-green-500"></i> Riwayat Perjalanan (Checkpoints)
+                        <i class="fa-solid fa-truck-ramp-box text-red-500"></i> Riwayat Perjalanan (Checkpoints)
                     </h3>
                     
                     <div id="timelineList" class="relative pl-6 space-y-6 border-l-2 border-slate-800 my-2">
@@ -119,50 +122,50 @@
 
     </main>
 
-    <!-- MODAL POPUP ADMIN (LOGIN & MANAJEMEN RESI) -->
+    <!-- MODAL POPUP ADMIN -->
     <div id="adminModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
 
-            <!-- Tampilan Login Admin (Sederhana) -->
+            <!-- Tampilan Login Admin -->
             <div id="adminLoginSection">
-                <h3 class="font-bold text-lg mb-1 text-white">Login Admin Pengelola</h3>
-                <p class="text-xs text-slate-400 mb-4">Masukkan password default untuk mengakses dashboard admin.</p>
+                <h3 class="font-bold text-lg mb-1 text-white">Login Admin PM EXPRESS</h3>
+                <p class="text-xs text-slate-400 mb-4">Masukkan password admin pengelola.</p>
                 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs text-slate-300 font-medium mb-1">Password Admin:</label>
                         <input type="password" id="adminPassInput" placeholder="Password (Default: admin123)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none">
                     </div>
-                    <button onclick="verifyAdminPass()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
-                        Masuk Ke Panel Admin
+                    <button onclick="verifyAdminPass()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                        Masuk Ke Dashboard Admin
                     </button>
                 </div>
             </div>
 
-            <!-- Tampilan Dashboard Admin (Setelah Login) -->
+            <!-- Tampilan Dashboard Admin -->
             <div id="adminDashboardSection" class="hidden space-y-5">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div>
-                        <h3 class="font-bold text-base text-white">Dashboard Admin</h3>
-                        <p class="text-[10px] text-green-400">● Sesi Admin Aktif</p>
+                        <h3 class="font-bold text-base text-white">Dashboard Admin PM EXPRESS</h3>
+                        <p class="text-[10px] text-emerald-400">● Sesi Admin Aktif</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="resetDataStorage()" class="text-xs bg-red-900/50 hover:bg-red-800 text-red-300 border border-red-700/60 px-2.5 py-1 rounded-lg">Reset Data</button>
+                        <button onclick="resetDataStorage()" class="text-xs bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 px-2.5 py-1 rounded-lg">Reset Data</button>
                         <button onclick="logoutAdmin()" class="text-xs text-slate-400 hover:underline py-1">Keluar</button>
                     </div>
                 </div>
 
-                <!-- Form Tambah Resi Baru -->
+                <!-- Form Buat Resi Baru -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wider">Buat Nomor Resi Baru</h4>
-                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: PM-2026-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 uppercase">
+                    <h4 class="font-bold text-xs text-red-400 uppercase tracking-wider">Buat Resi Baru (Luar Kota / Pulau Jawa)</h4>
+                    <input type="text" id="newResiCode" placeholder="Kode Resi (Contoh: JNT-LMJ-003)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 uppercase font-mono">
                     
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-1">Kota Asal:</label>
+                            <label class="block text-[10px] text-slate-400 mb-1">Kota Asal (Pengirim):</label>
                             <select id="newOriginSelect" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
                         </div>
                         <div>
@@ -171,14 +174,14 @@
                         </div>
                     </div>
 
-                    <button onclick="createNewResi()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold text-xs py-2 rounded-lg transition">
-                        + Tambah Resi Baru
+                    <button onclick="createNewResi()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2 rounded-lg transition">
+                        + Tambah Pengiriman Baru
                     </button>
                 </div>
 
-                <!-- Form Update Status / Progress Resi -->
+                <!-- Form Update Posisi Paket -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">Update Posisi / Checkpoint Paket</h4>
+                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">Update Posisi / Status Paket</h4>
                     <select id="adminSelectResi" onchange="loadAdminResiDetails()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
                         <option value="">Pilih Nomor Resi...</option>
                     </select>
@@ -187,10 +190,10 @@
                         <label class="block text-[11px] text-slate-400">Pilih Posisi Checkpoint Saat Ini:</label>
                         <select id="adminSelectCheckpoint" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
                         
-                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Misal: Paket Di Sortir)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                        <input type="text" id="adminStatusText" placeholder="Status Khusus (Contoh: Disortir di PM STORE Lumajang)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
                         
                         <button onclick="updateResiProgress()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2 rounded-lg transition">
-                            Simpan Pembaruan Lokasi
+                            Simpan Perubahan Lokasi
                         </button>
                     </div>
                 </div>
@@ -200,49 +203,54 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 text-center py-4 text-xs text-slate-500">
-        &copy; 2026 Tracking Express - Sistem Pelacakan Paket Real-Time.
+    <footer class="bg-slate-950 border-t border-slate-900 text-center py-4 text-xs text-slate-500">
+        &copy; 2026 PM EXPRESS - Pusat Layanan Pengiriman Pulau Jawa. Powered by PM STORE LUMAJANG.
     </footer>
 
     <!-- Script Logika Sistem -->
     <script>
-        // KAMUS KOORDINAT KOTA INDONESIA (AKURAT)
-        const CITY_COORDINATES = {
-            "Makassar": { lat: -5.1477, lng: 119.4327 },
-            "Tarakan": { lat: 3.3271, lng: 117.5816 },
-            "Jakarta": { lat: -6.2088, lng: 106.8456 },
-            "Surabaya": { lat: -7.2575, lng: 112.7521 },
-            "Lumajang": { lat: -8.1331, lng: 113.2223 },
-            "Maros": { lat: -5.0069, lng: 119.5742 },
-            "Balikpapan": { lat: -1.2379, lng: 116.8529 },
-            "Samarinda": { lat: -0.5022, lng: 117.1536 },
-            "Probolinggo": { lat: -7.7543, lng: 113.2159 },
-            "Semarang": { lat: -6.9667, lng: 110.4167 },
-            "Bandung": { lat: -6.9175, lng: 107.6191 }
+        // DAFTAR KOORDINAT LENGKAP KOTA-KOTA DI PULAU JAWA
+        const JAVA_CITIES = {
+            "Jakarta": { lat: -6.2088, lng: 106.8456, hubName: "Gudang Utama Jakarta" },
+            "Bogor": { lat: -6.5971, lng: 106.7949, hubName: "Drop Point Bogor" },
+            "Bandung": { lat: -6.9175, lng: 107.6191, hubName: "Hub Transit Bandung" },
+            "Cirebon": { lat: -6.7320, lng: 108.5523, hubName: "Hub Transit Cirebon" },
+            "Semarang": { lat: -6.9667, lng: 110.4167, hubName: "Hub Utama Semarang" },
+            "Yogyakarta": { lat: -7.7956, lng: 110.3695, hubName: "Drop Point Jogja" },
+            "Solo": { lat: -7.5755, lng: 110.8243, hubName: "Hub Transit Solo" },
+            "Madiun": { lat: -7.6298, lng: 111.5239, hubName: "Drop Point Madiun" },
+            "Kediri": { lat: -7.8480, lng: 112.0178, hubName: "Drop Point Kediri" },
+            "Surabaya": { lat: -7.2575, lng: 112.7521, hubName: "Gudang Utama Surabaya" },
+            "Malang": { lat: -7.9666, lng: 112.6326, hubName: "Hub Transit Malang" },
+            "Probolinggo": { lat: -7.7543, lng: 113.2159, hubName: "Hub Transit Probolinggo" },
+            "Lumajang (Pusat PM STORE)": { lat: -8.1331, lng: 113.2223, hubName: "Pusat Penyortiran PM STORE Lumajang" },
+            "Jember": { lat: -8.1845, lng: 113.6681, hubName: "Drop Point Jember" },
+            "Banyuwangi": { lat: -8.2192, lng: 114.3691, hubName: "Drop Point Banyuwangi" }
         };
 
-        // Sample Data Default yang Sudah Diperbaiki Koordinatnya
+        // Sample Data Paket Rute Pulau Jawa via Pusat Penyortiran PM STORE Lumajang
         const initialPackages = {
-            "PM-2026-001": {
-                resi: "PM-2026-001",
-                origin: "Makassar",
-                destination: "Tarakan",
-                currentCheckpointIndex: 0,
+            "JNT-LMJ-001": {
+                resi: "JNT-LMJ-001",
+                origin: "Jakarta",
+                destination: "Jember",
+                currentCheckpointIndex: 2,
                 checkpoints: [
-                    { name: "Gudang Makassar", lat: -5.1477, lng: 119.4327, status: "Paket Di Sortir", time: "2026-07-17 10:40", completed: true },
-                    { name: "Hub Transit Balikpapan", lat: -1.2379, lng: 116.8529, status: "Dalam Perjalanan Laut/Udara", time: "-", completed: false },
-                    { name: "Agen Kalimantan Tarakan", lat: 3.3271, lng: 117.5816, status: "Menuju Tujuan Akhir", time: "-", completed: false }
+                    { name: "Gudang Utama Jakarta", lat: -6.2088, lng: 106.8456, status: "Paket Di-pickup Kurir", time: "2026-07-16 08:00", completed: true },
+                    { name: "Hub Utama Semarang", lat: -6.9667, lng: 110.4167, status: "Paket Transit Jalur Pantura", time: "2026-07-16 20:30", completed: true },
+                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: -8.1331, lng: 113.2223, status: "Sedang Disortir di PM STORE Lumajang", time: "2026-07-17 09:15", completed: true },
+                    { name: "Drop Point Jember", lat: -8.1845, lng: 113.6681, status: "Menunggu Pengiriman Kurir Lokal", time: "-", completed: false }
                 ]
             },
-            "PM-2026-002": {
-                resi: "PM-2026-002",
+            "JNT-LMJ-002": {
+                resi: "JNT-LMJ-002",
                 origin: "Surabaya",
-                destination: "Lumajang",
+                destination: "Banyuwangi",
                 currentCheckpointIndex: 1,
                 checkpoints: [
-                    { name: "Gudang Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Diterima Kurir", time: "2026-07-17 06:00", completed: true },
-                    { name: "Hub Transit Probolinggo", lat: -7.7543, lng: 113.2159, status: "Sedang Dalam Perjalanan", time: "2026-07-17 11:20", completed: true },
-                    { name: "Agen Senggol Lumajang", lat: -8.1331, lng: 113.2223, status: "Menuju Tujuan Akhir", time: "-", completed: false }
+                    { name: "Gudang Utama Surabaya", lat: -7.2575, lng: 112.7521, status: "Paket Keluar Gudang Surabaya", time: "2026-07-17 06:00", completed: true },
+                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: -8.1331, lng: 113.2223, status: "Tiba di Hub PM STORE Lumajang", time: "2026-07-17 11:45", completed: true },
+                    { name: "Drop Point Banyuwangi", lat: -8.2192, lng: 114.3691, status: "Sedang Dalam Perjalanan Mobil Box", time: "-", completed: false }
                 ]
             }
         };
@@ -252,28 +260,27 @@
         let polylineLayer = null;
 
         function getDatabase() {
-            const data = localStorage.getItem('tracking_db_v2');
+            const data = localStorage.getItem('tracking_db_v3');
             if (!data) {
-                localStorage.setItem('tracking_db_v2', JSON.stringify(initialPackages));
+                localStorage.setItem('tracking_db_v3', JSON.stringify(initialPackages));
                 return initialPackages;
             }
             return JSON.parse(data);
         }
 
         function saveDatabase(db) {
-            localStorage.setItem('tracking_db_v2', JSON.stringify(db));
+            localStorage.setItem('tracking_db_v3', JSON.stringify(db));
         }
 
         function resetDataStorage() {
-            if (confirm("Reset seluruh data resi ke posisi awal?")) {
-                localStorage.removeItem('tracking_db_v2');
+            if (confirm("Reset seluruh data resi ke setelan default J&T PM EXPRESS?")) {
+                localStorage.removeItem('tracking_db_v3');
                 getDatabase();
                 alert("Database berhasil di-reset!");
                 location.reload();
             }
         }
 
-        // Rumus Haversine untuk Hitung Jarak (Km)
         function calculateHaversine(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -290,7 +297,6 @@
             trackPackage();
         }
 
-        // Fungsi Utama Lacak Paket
         function trackPackage() {
             const resiInput = document.getElementById('resiInput').value.trim().toUpperCase();
             const db = getDatabase();
@@ -313,15 +319,15 @@
             const finalCp = pkg.checkpoints[pkg.checkpoints.length - 1];
 
             document.getElementById('displayResi').innerText = pkg.resi;
-            document.getElementById('displayStatus').innerText = currentCp.status + " (" + currentCp.name + ")";
+            document.getElementById('displayStatus').innerText = currentCp.status;
             document.getElementById('displayRoute').innerText = pkg.origin + " ➔ " + pkg.destination;
 
             const remainingKm = calculateHaversine(currentCp.lat, currentCp.lng, finalCp.lat, finalCp.lng);
             let etaText = "";
             if (remainingKm === 0) {
-                etaText = "Tiba di Tujuan Akhir (0 km)";
+                etaText = "Tiba di Kota Tujuan (0 km)";
             } else {
-                const estHours = Math.ceil(remainingKm / 40);
+                const estHours = Math.ceil(remainingKm / 45);
                 etaText = remainingKm + " km (" + estHours + " Jam Est. Tiba)";
             }
             document.getElementById('displayEta').innerText = etaText;
@@ -343,9 +349,9 @@
 
                 let dotColor = "bg-slate-800 border-slate-700 text-slate-500";
                 if (isCurrent) {
-                    dotColor = "bg-blue-600 border-blue-400 text-white ring-4 ring-blue-500/20";
+                    dotColor = "bg-red-600 border-red-400 text-white ring-4 ring-red-500/30";
                 } else if (isPassed) {
-                    dotColor = "bg-green-600 border-green-500 text-white";
+                    dotColor = "bg-emerald-600 border-emerald-500 text-white";
                 }
 
                 item.innerHTML = `
@@ -354,7 +360,7 @@
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-xs ${isCurrent ? 'text-blue-400' : 'text-slate-200'}">${cp.name}</h4>
+                            <h4 class="font-bold text-xs ${isCurrent ? 'text-red-400' : 'text-slate-200'}">${cp.name}</h4>
                             <span class="text-[10px] text-slate-500">${cp.time}</span>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-0.5">${cp.status}</p>
@@ -368,7 +374,7 @@
             const points = pkg.checkpoints.map(cp => [cp.lat, cp.lng]);
 
             if (!map) {
-                map = L.map('map').setView(points[0], 5);
+                map = L.map('map').setView([-7.5, 111.0], 7);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 18,
                     attribution: '&copy; OpenStreetMap contributors'
@@ -383,8 +389,8 @@
                 const isCurrent = index === pkg.currentCheckpointIndex;
                 const marker = L.marker([cp.lat, cp.lng]).addTo(map);
                 
-                let popupContent = `<b>${cp.name}</b><br><span style="font-size:11px;">Status: ${cp.status}</span>`;
-                if (isCurrent) popupContent += `<br><b style="color:blue;">[Posisi Paket Saat Ini]</b>`;
+                let popupContent = `<b style="color:#dc2626;">${cp.name}</b><br><span style="font-size:11px;">Status: ${cp.status}</span>`;
+                if (isCurrent) popupContent += `<br><b style="color:#059669;">[Posisi Paket Saat Ini]</b>`;
                 
                 marker.bindPopup(popupContent);
                 if (isCurrent) marker.openPopup();
@@ -392,7 +398,7 @@
                 mapMarkers.push(marker);
             });
 
-            polylineLayer = L.polyline(points, { color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '6, 8' }).addTo(map);
+            polylineLayer = L.polyline(points, { color: '#dc2626', weight: 4, opacity: 0.85, dashArray: '6, 8' }).addTo(map);
             map.fitBounds(polylineLayer.getBounds(), { padding: [40, 40] });
         }
 
@@ -427,11 +433,12 @@
             originSel.innerHTML = '';
             destSel.innerHTML = '';
 
-            Object.keys(CITY_COORDINATES).forEach(city => {
+            Object.keys(JAVA_CITIES).forEach(city => {
                 originSel.innerHTML += `<option value="${city}">${city}</option>`;
                 destSel.innerHTML += `<option value="${city}">${city}</option>`;
             });
-            destSel.value = "Tarakan";
+            originSel.value = "Jakarta";
+            destSel.value = "Jember";
         }
 
         function populateAdminResiList() {
@@ -449,12 +456,13 @@
             const destCity = document.getElementById('newDestSelect').value;
 
             if (!code) {
-                alert('Mohon ketik Kode Resi!');
+                alert('Mohon masukkan Kode Resi!');
                 return;
             }
 
-            const originCoord = CITY_COORDINATES[originCity] || { lat: -5.1477, lng: 119.4327 };
-            const destCoord = CITY_COORDINATES[destCity] || { lat: 3.3271, lng: 117.5816 };
+            const originData = JAVA_CITIES[originCity];
+            const destData = JAVA_CITIES[destCity];
+            const lmjData = JAVA_CITIES["Lumajang (Pusat PM STORE)"];
 
             const db = getDatabase();
             db[code] = {
@@ -463,13 +471,14 @@
                 destination: destCity,
                 currentCheckpointIndex: 0,
                 checkpoints: [
-                    { name: "Gudang " + originCity, lat: originCoord.lat, lng: originCoord.lng, status: "Paket Di Sortir", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
-                    { name: "Hub Transit " + destCity, lat: destCoord.lat, lng: destCoord.lng, status: "Tiba di Kota Tujuan", time: "-", completed: false }
+                    { name: originData.hubName, lat: originData.lat, lng: originData.lng, status: "Paket Diproses di Kota Asal", time: new Date().toISOString().slice(0,16).replace('T',' '), completed: true },
+                    { name: "Pusat Penyortiran PM STORE Lumajang", lat: lmjData.lat, lng: lmjData.lng, status: "Sedang Transmisi Penyortiran di Lumajang", time: "-", completed: false },
+                    { name: destData.hubName, lat: destData.lat, lng: destData.lng, status: "Tiba di Kota Tujuan Akhir", time: "-", completed: false }
                 ]
             };
 
             saveDatabase(db);
-            alert('Resi ' + code + ' Berhasil Dibuat dengan Koordinat Akurat!');
+            alert('Resi ' + code + ' Berhasil Dibuat via Pusat Penyortiran PM STORE Lumajang!');
             populateAdminResiList();
         }
 
@@ -511,8 +520,8 @@
             closeAdminModal();
         }
 
-        // Jalankan Lacak Otomatis Resi PM-2026-001 saat pertama dibuka
-        quickSearch('PM-2026-001');
+        // Jalankan pencarian default resi pertama
+        quickSearch('JNT-LMJ-001');
     </script>
 </body>
 </html>
